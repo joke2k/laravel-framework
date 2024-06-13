@@ -11,6 +11,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\UriResolver;
+use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\UriTemplate\UriTemplate;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Client\Events\ConnectionFailed;
@@ -874,7 +876,7 @@ class PendingRequest
     public function send(string $method, string $url, array $options = [])
     {
         if (! Str::startsWith($url, ['http://', 'https://'])) {
-            $url = ltrim(rtrim($this->baseUrl, '/').'/'.ltrim($url, '/'), '/');
+            $url = (string) UriResolver::resolve(Utils::uriFor($this->baseUrl), Utils::uriFor($url));
         }
 
         $url = $this->expandUrlParameters($url);
