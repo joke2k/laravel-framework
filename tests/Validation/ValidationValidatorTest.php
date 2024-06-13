@@ -293,6 +293,28 @@ class ValidationValidatorTest extends TestCase
         $this->assertSame('validation.boolean', $v->messages()->get('b')[0]);
     }
 
+    public function testArrayNullableWithUnvalidatedArrayKeys()
+    {
+        $trans = $this->getIlluminateArrayTranslator();
+
+        $v = new Validator($trans, [
+            'x' => null,
+        ], [
+            'x' => 'array|nullable',
+            'x.key' => 'string',
+        ]);
+        $this->assertTrue($v->passes());
+        $this->assertArrayHasKey('x', $v->validated());
+
+        $v = new Validator($trans, [
+            'x' => null,
+        ], [
+            'x' => 'array',
+            'x.key' => 'string',
+        ]);
+        $this->assertFalse($v->passes());
+    }
+
     public function testNullableMakesNoDifferenceIfImplicitRuleExists()
     {
         $trans = $this->getIlluminateArrayTranslator();
@@ -5979,12 +6001,6 @@ class ValidationValidatorTest extends TestCase
         $this->assertTrue($v->passes());
 
         $v = new Validator($trans, ['x' => '0001-01-01T00:00'], ['x' => 'after:1970-01-01']);
-        $this->assertTrue($v->fails());
-
-        $v = new Validator($trans, ['x' => ['a' => ['v' => 'c']], 'y' => 'invalid'], ['x' => 'date', 'y' => 'date|after:x']);
-        $this->assertTrue($v->fails());
-
-        $v = new Validator($trans, ['x' => ['a' => ['v' => 'c']], 'y' => 'invalid'], ['x' => 'date', 'y' => 'date|before:x']);
         $this->assertTrue($v->fails());
     }
 
